@@ -1,0 +1,13 @@
+
+*.cmake
+*.bin
+*.out
+*.c
+*.make
+*.d
+*.o
+*.ts
+*.yaml
+*.check_cache
+*.marks
+*/build
