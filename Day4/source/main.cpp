@@ -1,11 +1,21 @@
 #include <cctype>
 #include <fstream>  //  input stream
 #include <string>   //  string, stoi
-#include <utility>  //  pair
+#include <vector>    //  vector
 #include <iostream> //  cout
+#include <cmath>    //  pow
 
-//  Iterates through string until entire number has been discovered, returns it.
-int getIntFromString(std::string& string, int& position){
+//  Returns first occurence of number, or 0
+int findCharacter(char character, std::string& string){
+    for (int index = 0; index < string.length(); index++){
+        if (string.at(index) == character){
+            return index;
+        }
+    }
+    return 0;
+}
+
+int extractNumber(std::string& string, int& position){
     std::string concatString = {};
     for (; position < string.length(); position++){
         if (std::isdigit(string.at(position))){
@@ -15,46 +25,75 @@ int getIntFromString(std::string& string, int& position){
         else if (concatString.length() > 0){
             break;
         }
-        continue;
     }
     return std::stoi(concatString);
 }
 
-void parseEntryToPair(std::string& string, std::pair<std::pair<int, int>, std::pair<int, int>>& elfPairing){
-    int position = 0;
-    elfPairing.first.first = getIntFromString(string, position);
-    elfPairing.first.second = getIntFromString(string, position);
-    elfPairing.second.first = getIntFromString(string, position);
-    elfPairing.second.second = getIntFromString(string, position);
+void fillWinningNumbers(std::vector<int>& winningNumbers, std::string& string){
+    //  Look for '|' character
+    int index = findCharacter('|', string);
+    if (index == 0){
+        return;
+    }
+
+    for (; index < string.length(); index++){
+        winningNumbers.push_back(extractNumber(string, index));
+    }
 }
 
-//  Checks if either pair eclipses the other.
-bool checkPair(std::pair<std::pair<int, int>, std::pair<int, int>>& elfPairing){
-    if ((elfPairing.first.first <= elfPairing.second.first &&
-        elfPairing.first.second >= elfPairing.second.second) ||
-        (elfPairing.second.first <= elfPairing.first.first &&
-        elfPairing.second.second >= elfPairing.first.second)){
-            return false;
+void fillObtainedNumbers(std::vector<int>& obtainedNumbers, std::string& string){
+    const int maxIndex = findCharacter('|', string);
+    int index = findCharacter(':', string);
+    if (maxIndex == 0 || index == 0){
+        return;
     }
-    return true;
+
+    for (; index < maxIndex; index++){
+        obtainedNumbers.push_back(extractNumber(string, index));
+    }
+}
+
+int totalOverlaps(std::vector<int>& winningNumbers, std::vector<int>& obtainedNumbers){
+    int amount = 0;
+    for (int value : obtainedNumbers){
+        //std::cout << "\n" << value << " | ";
+        for (int compVal : winningNumbers){
+            //std::cout << compVal << " | ";
+            if (compVal == value){
+                amount++;
+                break;
+            }
+        }
+    }
+    return amount;
+}
+
+int tallyScore(std::vector<int>& winningNumbers, std::vector<int>& obtainedNumbers){
+    const int scores = totalOverlaps(winningNumbers, obtainedNumbers);
+    //std::cout <<  scores << "\n";
+    if (scores <= 0){
+        return 0;
+    }
+    return std::pow(2, (scores - 1));
 }
 
 int main(){
-    int sumOfElves = 0;
+    int totalPoints = 0;
 
     std::ifstream inputFile("input.txt");
     std::string curLine{};
 
     while(std::getline(inputFile, curLine)){
-        std::pair<std::pair<int, int>, std::pair<int, int>> elfPairing = {};
-        //  12-38,12-37
-        parseEntryToPair(curLine, elfPairing);
-        if (!checkPair(elfPairing)){
-            sumOfElves++;
-        }
+        std::vector<int> winningNumbers={};
+        std::vector<int> obtainedNumbers={};
+
+        fillWinningNumbers(winningNumbers, curLine);
+        fillObtainedNumbers(obtainedNumbers, curLine);
+
+        totalPoints += tallyScore(winningNumbers, obtainedNumbers);
     }
 
-    std::cout << sumOfElves << std::endl;
+    std::cout << totalPoints << std::endl;
 
     return 1;
 }

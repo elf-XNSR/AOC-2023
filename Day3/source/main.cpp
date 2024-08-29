@@ -3,7 +3,6 @@
 #include <array>
 #include <utility>  //  pair
 #include <iostream>
-#include <ctype.h>
 
 
 //  Writes lines to parsingRows[index][1]
