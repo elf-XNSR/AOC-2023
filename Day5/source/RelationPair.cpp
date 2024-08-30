@@ -1,6 +1,4 @@
 #include "RelationPair.hpp"
-#include <string>
-#include <iostream>
 
 uint32_t CRelationPair::extractInteger(std::string& string, int& position){
     std::string concatString = {};
